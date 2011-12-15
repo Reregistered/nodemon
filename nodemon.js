@@ -282,16 +282,22 @@ process.on('exit', function (code) {
   sys.log('[nodemon] exiting');
 });
 
-// usual suspect: ctrl+c exit
-process.on('SIGINT', function () {
-  cleanup();
-  process.exit(0);
-});
+// SIGINT and SIGTERM are currently ( as of Nodejs 6.5)
+// not supported on win32 platform. Adding them at all 
+// will crash
+var isWindows = process.platform === 'win32';
+if (!isWindows){
+  // usual suspect: ctrl+c exit
+  process.on('SIGINT', function () {
+    cleanup();
+    process.exit(0);
+  });
 
-process.on('SIGTERM', function () {
-  cleanup();
-  process.exit(0);
-});
+  process.on('SIGTERM', function () {
+    cleanup();
+    process.exit(0);
+  });
+}
 
 // on exception *inside* nodemon, shutdown wrapped node app
 process.on('uncaughtException', function (err) {
